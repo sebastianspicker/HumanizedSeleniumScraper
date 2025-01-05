@@ -1,9 +1,5 @@
 # HumanizedSeleniumScraper
-A Python script that automates "human-like" Google searches with Selenium, including subpage BFS,  robust cookie banner handling, address/keyword checks, and phone/email detection.
-
-# Humanized-Selenium-Google-Scraper
-
-A Python-based project aiming to scrape Google search results **as humanly as possible** using Selenium. This script types queries character by character, randomly moves the mouse, handles cookie banners, explores subpages up to a defined depth, and attempts to detect phone numbers/emails (including obfuscated ones). It also includes address/keyword checks to deem pages "relevant."
+A Python-based project aiming to scrape Google search results **as humanly as possible** using Selenium including subpage BFS,  robust cookie banner handling, address/keyword checks, and phone/email detection. This script types queries character by character, randomly moves the mouse, handles cookie banners, explores subpages up to a defined depth, and attempts to detect phone numbers/emails (including obfuscated ones). It also includes address/keyword checks to deem pages "relevant."
 
 ---
 
