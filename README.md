@@ -198,15 +198,15 @@ Below is a **`requirements.txt`** file, a short description for a **Beta01** rel
  
 ## Disclaimer
 
-1. Respect Terms of Service
+### 1. Respect Terms of Service:
    Automated scraping of Google may violate Google’s TOS.
    Use responsibly and check local regulations.
 
-2. No Guarantee
+### 2. No Guarantee:
    This script is a demonstration. Google can still detect patterns or block IP addresses.
    We do not assume liability for blocked requests or policy infringements.
 
-3. Ethical Usage
+### 3. Ethical Usage:
    This repository aims at educational usage, not illicit data harvesting.
    Always ensure you have permission to scrape.
 
