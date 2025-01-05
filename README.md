@@ -237,7 +237,7 @@ Below is a **`requirements.txt`** file, a short description for a **Beta01** rel
      [10408:5044:0105/142035.622:ERROR:sandbox_win.cc(791)] 
      Sandbox cannot access executable. 
      Check filesystem permissions are valid. 
-     See https://bit.ly/31yqMJR.: Zugriff verweigert (0x5)
+     See https://bit.ly/31yqMJR.: Access denied (0x5)
      ```
    - **Explanation:**  
      This is a **Windows** permissions issue indicating that the Chrome/Chromedriver sandbox lacks the necessary rights to run or access certain files.  
