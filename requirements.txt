@@ -1,0 +1,9 @@
+## **`requirements.txt`**
+
+```txt
+selenium>=4.0
+```
+
+> **Note**:  
+> - You must have a **matching `chromedriver`** for your local Chrome or Chromium version.  
+> - Other modules (`re`, `time`, `random`, `concurrent.futures`, etc.) are part of Python’s standard library and do not require additional installations.
