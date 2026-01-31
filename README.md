@@ -43,23 +43,80 @@ A Python-based project aiming to scrape Google search results **as humanly as po
 
 ## Installation
 
-1. **Clone** this repository:
+1. Set up a virtual environment (recommended):
    ```bash
-   git clone https://github.com/YourUsername/Humanized-Selenium-Google-Scraper.git
-   cd Humanized-Selenium-Google-Scraper
-2. Set up a virtual environment (recommended)
-   python -m venv venv
-   source venv/bin/activate  # Linux/macOS
-   or venv\Scripts\activate on Windows
-3. Install dependencies:
-   pip install -r requirements.txt
-   Make sure you have a matching version of chromedriver for your local Chrome/Chromium.
+   python -m venv .venv
+   source .venv/bin/activate  # Linux/macOS
+   # Windows: .venv\Scripts\activate
+   ```
+2. Install dependencies:
+   - Runtime only:
+     ```bash
+     python -m pip install -r requirements.txt
+     ```
+   - Development (includes `pytest` + `ruff`):
+     ```bash
+     python -m pip install -e ".[dev]"
+     ```
+3. Make sure Chrome/Chromium is installed. Selenium 4 can usually resolve the right driver automatically.
 4. Prepare your CSV:
-   By default, it expects adresses.csv with four columns: [Name, Street, Zip, City].
-   Comma-separated, no header row.
+   - Default input file: `adressen.csv`
+   - 4 columns: `[Name, Street, Zip, City]` (comma-separated, no header)
 5. Run:
+   ```bash
+   python -m humanized_selenium_scraper --input adressen.csv --output ergebnisse.csv
+   # or (backward-compatible)
    python HumanizedSeleniumScraper.py
-   The script will generate an results.csv (or whichever output file you define).
+   ```
+
+## Development
+
+Offline-stable tests: the unit tests do not launch a browser and do not perform network requests.
+
+```bash
+ruff format .
+ruff check .
+pytest -q
+```
+
+## Generic Use Cases (Configurable Search)
+
+The scraper is designed to be generic: you can decide what is searched via a query template and relevance rules.
+
+### 1) Presets (quick start)
+
+- Default preset (`contact`) expects a headerless CSV with columns `name,street,plz,city`:
+  ```bash
+  python -m humanized_selenium_scraper --input adressen.csv --output ergebnisse.csv
+  ```
+
+- Keywords-only preset (`keywords`) expects columns `query,keyword`:
+  ```bash
+  python -m humanized_selenium_scraper --preset keywords --columns query,keyword --input input.csv
+  ```
+
+### 2) Custom templates (CLI flags)
+
+Example: search for any `{name}` + `{city}` and consider pages relevant if they contain `kontakt` often enough:
+
+```bash
+python -m humanized_selenium_scraper \
+  --columns name,city \
+  --query-template "{name} {city} kontakt" \
+  --keyword-template "{name}" \
+  --keyword-template "kontakt" \
+  --min-keyword-hits 3 \
+  --no-require-address \
+  --domain-match any
+```
+
+### 3) TOML spec file
+
+For more settings in one place (url filter, navigation, retries, ...), use `--spec`:
+
+```bash
+python -m humanized_selenium_scraper --spec example_search_spec.toml --header --input input.csv
+```
 
 ## Usage
 

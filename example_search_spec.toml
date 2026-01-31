@@ -1,0 +1,27 @@
+[selenium]
+google_domain = "google.de"
+restart_threshold = 30
+max_retries = 3
+
+[search]
+# Build the query from CSV columns via Python's str.format placeholders.
+query_template = "{name} {city} kontakt"
+extract_phone = true
+extract_email = true
+
+[relevance]
+# These are evaluated against page HTML (page source).
+keyword_templates = ["{name}", "kontakt", "impressum"]
+min_total_keyword_hits = 3
+require_address = false
+
+[url_filter]
+domain_match = "query_part" # or "any"
+allowed_tlds = [".de", ".com"]
+domain_keyword_blacklist = ["facebook", "instagram", "linkedin"]
+min_query_part_len = 3
+
+[navigation]
+max_google_results = 20
+max_links_per_page = 30
+subpage_depth = 2
