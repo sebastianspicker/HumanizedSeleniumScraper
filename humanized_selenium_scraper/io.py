@@ -14,24 +14,24 @@ def read_csv_rows(
 ) -> Iterable[dict[str, str]]:
     with path.open("r", encoding="utf-8", newline="") as handle:
         if has_header:
-            reader = csv.DictReader(handle, delimiter=delimiter)
-            if reader.fieldnames is None:
+            dict_reader = csv.DictReader(handle, delimiter=delimiter)
+            if dict_reader.fieldnames is None:
                 raise ValueError("CSV header requested, but no header row found.")
-            for row in reader:
-                yield {k: (v or "") for k, v in row.items() if k is not None}
+            for row_dict in dict_reader:
+                yield {k: (v or "") for k, v in row_dict.items() if k is not None}
             return
 
-        reader = csv.reader(handle, delimiter=delimiter)
-        for row in reader:
+        row_reader = csv.reader(handle, delimiter=delimiter)
+        for row_list in row_reader:
             if columns is None:
-                cols = [f"col{i + 1}" for i in range(len(row))]
+                cols = [f"col{i + 1}" for i in range(len(row_list))]
             else:
-                if len(row) != len(columns):
+                if len(row_list) != len(columns):
                     raise ValueError(
-                        f"Row has {len(row)} columns but expected {len(columns)}: {row!r}"
+                        f"Row has {len(row_list)} columns but expected {len(columns)}: {row_list!r}"
                     )
                 cols = columns
-            yield {cols[i]: (row[i] or "") for i in range(len(cols))}
+            yield {cols[i]: (row_list[i] or "") for i in range(len(cols))}
 
 
 def parse_columns_arg(value: str) -> list[str]:

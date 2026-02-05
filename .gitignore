@@ -9,6 +9,8 @@ __pycache__/
 venv/
 ENV/
 .env
+.env.*
+.python-version
 
 ### Packaging
 build/
@@ -20,12 +22,25 @@ dist/
 .ruff_cache/
 .mypy_cache/
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
+.nox/
+.tox/
 
 ### Project outputs
 scraper.log
 chrome_profile/
 ergebnisse.csv
+adressen.csv
+
+### Local docs (findings/logs/decisions)
+DECISIONS.md
+FINDINGS.md
+LOG.md
+REFACTOR_PLAN.md
+PHYSICS_AUDIT.md
+validation.md
 
 ### OS / Editors
 .DS_Store

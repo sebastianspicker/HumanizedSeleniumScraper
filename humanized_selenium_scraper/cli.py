@@ -11,18 +11,21 @@ from .config import ScraperConfig
 from .exceptions import SkipEntryError
 from .human import random_pause
 from .io import parse_columns_arg, read_csv_rows
+from .logging_utils import redact_query
 from .scraper import Session
 from .spec import SearchSpec, render_template
 
 write_lock = threading.Lock()
 
 
-def _write_results(path: Path, *, header: list[str], rows: list[list[str]]) -> None:
+def _write_row(path: Path, *, header: list[str], row: list[str], write_header: bool) -> None:
+    mode = "w" if write_header else "a"
     with write_lock:
-        with path.open("w", encoding="utf-8", newline="") as handle:
+        with path.open(mode, encoding="utf-8", newline="") as handle:
             writer = csv.writer(handle)
-            writer.writerow(header)
-            writer.writerows(rows)
+            if write_header:
+                writer.writerow(header)
+            writer.writerow(row)
 
 
 def run(
@@ -35,7 +38,7 @@ def run(
     has_header: bool,
     columns: list[str] | None,
 ) -> int:
-    results: list[list[str]] = []
+    wrote_header = False
     input_columns = columns or []
     if has_header:
         with input_file.open("r", encoding="utf-8", newline="") as handle:
@@ -55,25 +58,29 @@ def run(
                 query = render_template(spec.query_template, row).strip()
                 if not query:
                     raise ValueError("Rendered query is empty.")
-                logging.info("Processing query => %s", query)
+                logging.info("Processing query => %s", redact_query(query))
 
                 found_url, phone, email = session.search(query=query, row=row, spec=spec)
-                results.append(
-                    [
-                        *(row.get(col, "") for col in input_columns),
-                        found_url or "",
-                        phone or "",
-                        email or "",
-                    ]
-                )
+                row_out = [
+                    *(row.get(col, "") for col in input_columns),
+                    found_url or "",
+                    phone or "",
+                    email or "",
+                ]
             except SkipEntryError as exc:
                 logging.warning("SKIP => %s", exc)
-                results.append([*(row.get(col, "") for col in input_columns), "", "", ""])
+                row_out = [*(row.get(col, "") for col in input_columns), "", "", ""]
             except Exception as exc:
                 logging.warning("process_row failed: %s", exc)
-                results.append([*(row.get(col, "") for col in input_columns), "", "", ""])
+                row_out = [*(row.get(col, "") for col in input_columns), "", "", ""]
 
-            _write_results(output_file, header=out_header, rows=results)
+            _write_row(
+                output_file,
+                header=out_header,
+                row=row_out,
+                write_header=not wrote_header,
+            )
+            wrote_header = True
             random_pause(1, 2)
     finally:
         session.close()

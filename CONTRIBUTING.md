@@ -15,10 +15,13 @@ python -m pip install -e ".[dev]"
 ```bash
 ruff format .
 ruff check .
+mypy humanized_selenium_scraper
 pytest -q
+bandit -r humanized_selenium_scraper -x tests --severity-level medium
+pip-audit -r requirements.txt
 ```
 
 ## Commit checklist
 
 - No generated files committed (`*.egg-info/`, `.ruff_cache/`, `.pytest_cache/`, `chrome_profile/`, `scraper.log`)
-- `ruff check .` and `pytest -q` are green
+- `ruff check .`, `mypy humanized_selenium_scraper`, `pytest -q` are green
