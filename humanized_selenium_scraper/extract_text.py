@@ -25,7 +25,12 @@ _PHONE_SIMPLE_RE = re.compile(
 
 
 def decode_antispam_mail(encoded_string: str) -> str:
-    return "".join(chr(ord(ch) - 1) for ch in encoded_string)
+    def _decode_char(ch: str) -> str:
+        if ord(ch) >= 1:
+            return chr(ord(ch) - 1)
+        return ch
+
+    return "".join(_decode_char(ch) for ch in encoded_string)
 
 
 def parse_less_generous_phones(text: str) -> set[str]:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import random
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -88,11 +89,10 @@ def search_subpages(
         try:
             href = link.get_attribute("href")
         except StaleElementReferenceException as exc:
-            logging.warning("Stale subpage BFS => attempt=%s", attempt)
+            logging.warning("Stale subpage BFS => attempt=%s, skipping link", attempt)
             if attempt >= config.max_retries:
                 raise SkipEntryError("subpages => stale => skip") from exc
-            links_fresh = driver.find_elements(By.TAG_NAME, "a")[:max_links]
-            href = links_fresh[idx].get_attribute("href") if idx < len(links_fresh) else None
+            href = None
 
         if not href:
             continue
@@ -130,7 +130,7 @@ class Session:
     counter: int = 0
 
     @classmethod
-    def create(cls, config: ScraperConfig, *, profile_dir) -> Session:
+    def create(cls, config: ScraperConfig, *, profile_dir: Path) -> Session:
         return cls(config=config, driver=create_driver(config, profile_dir=profile_dir))
 
     def close(self) -> None:
@@ -142,12 +142,18 @@ class Session:
     def maybe_restart_driver(self, *, profile_dir) -> None:
         if self.counter == 0:
             return
+        if self.config.restart_threshold <= 0:
+            return
         if self.counter % self.config.restart_threshold != 0:
             return
 
         logging.info("Restart driver => threshold")
-        self.close()
-        self.driver = create_driver(self.config, profile_dir=profile_dir)
+        new_driver = create_driver(self.config, profile_dir=profile_dir)
+        try:
+            self.driver.quit()
+        except Exception:
+            pass
+        self.driver = new_driver
 
     def search(self, *, query: str, row: dict[str, str], spec: SearchSpec, attempt: int = 1):
         self.maybe_restart_driver(profile_dir=self.config.chrome_profile_root)
@@ -193,10 +199,8 @@ class Session:
             except StaleElementReferenceException as exc:
                 if attempt >= self.config.max_retries:
                     raise SkipEntryError(f"stale google link => skip => {exc}") from exc
-                glinks_fresh = self.driver.find_elements(By.XPATH, "//a[contains(@href,'http')]")[
-                    :20
-                ]
-                href = glinks_fresh[idx].get_attribute("href") if idx < len(glinks_fresh) else None
+                logging.warning("Stale google link => skipping (attempt=%s)", attempt)
+                href = None
 
             if not href:
                 continue

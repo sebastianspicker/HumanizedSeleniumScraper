@@ -81,8 +81,9 @@ class SearchSpec:
         spec = cls(
             query_template=str(search_data.get("query_template", cls().query_template)),
             relevance=RelevanceSpec(
-                keyword_templates=tuple(
-                    relevance_data.get("keyword_templates", cls().relevance.keyword_templates)
+                keyword_templates=_ensure_str_tuple(
+                    relevance_data.get("keyword_templates"),
+                    cls().relevance.keyword_templates,
                 ),
                 min_total_keyword_hits=int(
                     relevance_data.get(
@@ -107,13 +108,13 @@ class SearchSpec:
                 domain_match=str(
                     url_filter_data.get("domain_match", cls().url_filter.domain_match)
                 ),
-                allowed_tlds=tuple(
-                    url_filter_data.get("allowed_tlds", cls().url_filter.allowed_tlds)
+                allowed_tlds=_ensure_str_tuple(
+                    url_filter_data.get("allowed_tlds"),
+                    cls().url_filter.allowed_tlds,
                 ),
-                domain_keyword_blacklist=tuple(
-                    url_filter_data.get(
-                        "domain_keyword_blacklist", cls().url_filter.domain_keyword_blacklist
-                    )
+                domain_keyword_blacklist=_ensure_str_tuple(
+                    url_filter_data.get("domain_keyword_blacklist"),
+                    cls().url_filter.domain_keyword_blacklist,
                 ),
                 min_query_part_len=int(
                     url_filter_data.get("min_query_part_len", cls().url_filter.min_query_part_len)
@@ -154,3 +155,14 @@ def render_templates(templates: tuple[str, ...], row: dict[str, str]) -> list[st
 
 def _as_dict(value: Any) -> dict[str, Any]:
     return dict(value) if isinstance(value, dict) else {}
+
+
+def _ensure_str_tuple(value: Any, default: tuple[str, ...]) -> tuple[str, ...]:
+    """Normalize TOML value to tuple[str]: single string -> one-element tuple, list -> tuple."""
+    if value is None or (isinstance(value, (list, tuple)) and len(value) == 0):
+        return default
+    if isinstance(value, str):
+        return (value,)
+    if isinstance(value, (list, tuple)):
+        return tuple(str(x) for x in value)
+    return (str(value),)

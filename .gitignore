@@ -51,3 +51,4 @@ validation.md
 .DS_Store
 .idea/
 .vscode/
+.cursor/

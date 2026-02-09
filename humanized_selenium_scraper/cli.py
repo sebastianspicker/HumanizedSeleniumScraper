@@ -47,6 +47,8 @@ def run(
             if not header:
                 raise ValueError("Input CSV is empty.")
             input_columns = [h.strip() for h in header if h.strip()]
+            if not input_columns:
+                raise ValueError("Header row is empty (no column names).")
 
     out_header = [*input_columns, "Website", "Phone", "Email"]
     session = Session.create(config, profile_dir=config.chrome_profile_root)

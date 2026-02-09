@@ -42,8 +42,16 @@ class ScraperConfig:
     def from_mapping(cls, data: dict[str, Any]) -> ScraperConfig:
         if not data:
             return cls()
+        defaults = cls()
         return cls(
-            google_domain=str(data.get("google_domain", cls().google_domain)),
-            restart_threshold=int(data.get("restart_threshold", cls().restart_threshold)),
-            max_retries=int(data.get("max_retries", cls().max_retries)),
+            google_domain=str(data.get("google_domain", defaults.google_domain)),
+            restart_threshold=int(data.get("restart_threshold", defaults.restart_threshold)),
+            max_retries=int(data.get("max_retries", defaults.max_retries)),
+            chrome_profile_root=Path(data["chrome_profile_root"])
+            if "chrome_profile_root" in data
+            else defaults.chrome_profile_root,
+            page_load_timeout_s=int(
+                data.get("page_load_timeout_s", defaults.page_load_timeout_s)
+            ),
+            implicit_wait_s=int(data.get("implicit_wait_s", defaults.implicit_wait_s)),
         )
