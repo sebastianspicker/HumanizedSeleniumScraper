@@ -16,7 +16,7 @@ dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.8", "bandit>=1.7"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-extend-exclude = ["chrome_profile", "scraper.log", "ergebnisse.csv", "adressen.csv"]
+extend-exclude = ["chrome_profile", "scraper.log", "input.csv", "output.csv"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

@@ -1,6 +1,35 @@
 from __future__ import annotations
 
+import pytest
+
 from humanized_selenium_scraper.spec import SearchSpec
+
+
+def test_searchspec_from_toml_file_not_found_raises(tmp_path) -> None:
+    missing = tmp_path / "missing.toml"
+    assert not missing.exists()
+    with pytest.raises(ValueError, match="Spec file not found"):
+        SearchSpec.from_toml(missing)
+
+
+def test_searchspec_from_toml_invalid_int_uses_default(tmp_path) -> None:
+    """Invalid or non-numeric values for int fields fall back to defaults."""
+    toml_content = """
+[search]
+query_template = "{name}"
+
+[relevance]
+min_total_keyword_hits = "not_a_number"
+
+[navigation]
+max_google_results = 999
+"""
+    path = tmp_path / "spec.toml"
+    path.write_text(toml_content, encoding="utf-8")
+    spec, _ = SearchSpec.from_toml(path)
+    # Default min_total_keyword_hits is 6 when value is invalid
+    assert spec.relevance.min_total_keyword_hits == 6
+    assert spec.navigation.max_google_results == 999
 
 
 def test_searchspec_from_toml_overrides(tmp_path) -> None:
@@ -11,12 +40,12 @@ restart_threshold = 10
 max_retries = 5
 
 [search]
-query_template = "{name} {city} kontakt"
+query_template = "{name} {city} contact"
 extract_phone = false
 extract_email = true
 
 [relevance]
-keyword_templates = ["{name}", "kontakt"]
+keyword_templates = ["{name}", "contact"]
 min_total_keyword_hits = 2
 require_address = false
 
@@ -39,11 +68,11 @@ subpage_depth = 1
     assert config.restart_threshold == 10
     assert config.max_retries == 5
 
-    assert spec.query_template == "{name} {city} kontakt"
+    assert spec.query_template == "{name} {city} contact"
     assert spec.extract_phone is False
     assert spec.extract_email is True
 
-    assert spec.relevance.keyword_templates == ("{name}", "kontakt")
+    assert spec.relevance.keyword_templates == ("{name}", "contact")
     assert spec.relevance.min_total_keyword_hits == 2
     assert spec.relevance.require_address is False
 

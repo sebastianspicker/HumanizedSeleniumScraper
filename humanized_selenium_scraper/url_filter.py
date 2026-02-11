@@ -18,6 +18,7 @@ DEFAULT_ALLOWED_TLDS = (
     ".online",
 )
 
+# Example directories and platforms to skip (extend for your locale)
 DEFAULT_DOMAIN_KEYWORD_BLACKLIST = (
     "facebook",
     "instagram",

@@ -7,7 +7,7 @@ from typing import Any
 
 @dataclass(frozen=True)
 class ScraperConfig:
-    google_domain: str = "google.de"
+    google_domain: str = "google.com"
     restart_threshold: int = 30
     max_retries: int = 3
 
@@ -43,15 +43,30 @@ class ScraperConfig:
         if not data:
             return cls()
         defaults = cls()
+
+        def _int(key: str, default: int) -> int:
+            val = data.get(key, default)
+            if isinstance(val, int) and not isinstance(val, bool):
+                return val
+            try:
+                return int(val) if val is not None else default
+            except (TypeError, ValueError):
+                return default
+
+        def _path(key: str) -> Path | None:
+            if key not in data:
+                return None
+            val = data[key]
+            if isinstance(val, (str, Path)) or (hasattr(val, "__fspath__")):
+                return Path(val)
+            return None
+
+        chrome_root = _path("chrome_profile_root")
         return cls(
             google_domain=str(data.get("google_domain", defaults.google_domain)),
-            restart_threshold=int(data.get("restart_threshold", defaults.restart_threshold)),
-            max_retries=int(data.get("max_retries", defaults.max_retries)),
-            chrome_profile_root=Path(data["chrome_profile_root"])
-            if "chrome_profile_root" in data
-            else defaults.chrome_profile_root,
-            page_load_timeout_s=int(
-                data.get("page_load_timeout_s", defaults.page_load_timeout_s)
-            ),
-            implicit_wait_s=int(data.get("implicit_wait_s", defaults.implicit_wait_s)),
+            restart_threshold=_int("restart_threshold", defaults.restart_threshold),
+            max_retries=_int("max_retries", defaults.max_retries),
+            chrome_profile_root=chrome_root if chrome_root is not None else defaults.chrome_profile_root,
+            page_load_timeout_s=_int("page_load_timeout_s", defaults.page_load_timeout_s),
+            implicit_wait_s=_int("implicit_wait_s", defaults.implicit_wait_s),
         )

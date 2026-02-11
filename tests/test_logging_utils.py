@@ -2,7 +2,7 @@ from humanized_selenium_scraper.logging_utils import redact_query
 
 
 def test_redact_query_does_not_include_input() -> None:
-    query = "ACME Musterstraße 12 12345 Berlin kontakt"
+    query = "ACME Main St 12 12345 Berlin contact"
     redacted = redact_query(query)
     assert query not in redacted
     assert "len=" in redacted

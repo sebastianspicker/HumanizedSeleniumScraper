@@ -7,4 +7,4 @@ def test_is_relevant_url_filters_blacklist() -> None:
 
 def test_is_relevant_url_requires_tld_and_query_part() -> None:
     assert is_relevant_url("firma berlin", "https://example.invalid/") is False
-    assert is_relevant_url("firma berlin", "https://firma-berlin.de/kontakt") is True
+    assert is_relevant_url("firma berlin", "https://firma-berlin.de/contact") is True

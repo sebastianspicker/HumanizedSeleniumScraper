@@ -15,11 +15,14 @@ def random_pause(base_s: float = 1.0, var_s: float = 2.0) -> None:
 
 
 def do_infinite_scrolling(driver, max_scroll: int = 3, pause_s: float = 1.0) -> None:
-    last_height = driver.execute_script("return document.body.scrollHeight")
+    height_script = "return document.body ? document.body.scrollHeight : 0"
+    last_height = driver.execute_script(height_script) or 0
     for _ in range(max_scroll):
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        driver.execute_script(
+            "var b = document.body; if (b) window.scrollTo(0, b.scrollHeight);"
+        )
         time.sleep(pause_s)
-        new_height = driver.execute_script("return document.body.scrollHeight")
+        new_height = driver.execute_script(height_script) or 0
         if new_height == last_height:
             break
         last_height = new_height

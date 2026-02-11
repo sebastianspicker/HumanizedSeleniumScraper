@@ -42,6 +42,7 @@ def click_element_robust(driver, elem, tries: int = 2) -> bool:
 
 
 def click_cookie_consent_if_present(driver) -> None:
+    # Selectors for common consent buttons (EN + DE wording)
     possible_selectors = [
         (
             "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',"
@@ -59,34 +60,36 @@ def click_cookie_consent_if_present(driver) -> None:
             btn = WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.XPATH, selector)))
             if click_element_robust(driver, btn, tries=2):
                 time.sleep(1)
-                logging.info("Cookie-Banner clicked by selector: %s", selector)
+                logging.info("Cookie consent clicked by selector: %s", selector)
                 return
         except Exception:
             continue
-    logging.info("Cookie-Banner: no matching selector found (not critical).")
+    logging.info("No matching cookie consent selector found (not critical).")
 
 
 def safe_get(driver, config: ScraperConfig, url: str, *, attempt: int = 1) -> bool:
     if url.lower().endswith(".pdf"):
         logging.info("SKIP PDF => %s", url)
         return False
-    try:
-        driver.get(url)
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        return True
-    except WebDriverException as exc:
-        msg = str(exc)
-        if "ERR_CERT_DATE_INVALID" in msg:
-            logging.info("Skipping insecure (cert) => %s", url)
-            return False
-        logging.warning("WebDriverException => %s (attempt=%s)", msg, attempt)
-        if attempt >= config.max_retries:
-            raise SkipEntryError(f"Too many failures => {url}") from exc
-        random_pause(1, 1.5)
-        return safe_get(driver, config, url, attempt=attempt + 1)
-    except TimeoutException as exc:
-        logging.warning("Timeout => attempt=%s, url=%s", attempt, url)
-        if attempt >= config.max_retries:
-            raise SkipEntryError(f"Timeout x{config.max_retries} => {url}") from exc
-        random_pause(1, 1.5)
-        return safe_get(driver, config, url, attempt=attempt + 1)
+    current_attempt = attempt
+    while True:
+        try:
+            driver.get(url)
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+            return True
+        except WebDriverException as exc:
+            msg = str(exc)
+            if "ERR_CERT_DATE_INVALID" in msg:
+                logging.info("Skipping insecure (cert) => %s", url)
+                return False
+            logging.warning("WebDriverException => %s (attempt=%s)", msg, current_attempt)
+            if current_attempt >= config.max_retries:
+                raise SkipEntryError(f"Too many failures => {url}") from exc
+            random_pause(1, 1.5)
+            current_attempt += 1
+        except TimeoutException as exc:
+            logging.warning("Timeout => attempt=%s, url=%s", current_attempt, url)
+            if current_attempt >= config.max_retries:
+                raise SkipEntryError(f"Timeout x{config.max_retries} => {url}") from exc
+            random_pause(1, 1.5)
+            current_attempt += 1

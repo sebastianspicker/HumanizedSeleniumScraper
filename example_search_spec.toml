@@ -1,17 +1,17 @@
 [selenium]
-google_domain = "google.de"
+google_domain = "google.com"
 restart_threshold = 30
 max_retries = 3
 
 [search]
 # Build the query from CSV columns via Python's str.format placeholders.
-query_template = "{name} {city} kontakt"
+query_template = "{name} {city} contact"
 extract_phone = true
 extract_email = true
 
 [relevance]
 # These are evaluated against page HTML (page source).
-keyword_templates = ["{name}", "kontakt", "impressum"]
+keyword_templates = ["{name}", "contact", "imprint"]
 min_total_keyword_hits = 3
 require_address = false
 

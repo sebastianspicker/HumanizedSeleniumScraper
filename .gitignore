@@ -12,9 +12,10 @@ ENV/
 .env.*
 .python-version
 
-### Packaging
+### Packaging (build artifacts; not needed in repo)
 build/
 dist/
+*.egg
 *.egg-info/
 
 ### Tooling caches
@@ -36,8 +37,8 @@ junit-*.xml
 ### Project outputs
 scraper.log
 chrome_profile/
-ergebnisse.csv
-adressen.csv
+input.csv
+output.csv
 
 ### Local docs (findings/logs/decisions)
 DECISIONS.md
@@ -52,3 +53,4 @@ validation.md
 .idea/
 .vscode/
 .cursor/
+.codex/

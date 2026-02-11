@@ -38,7 +38,7 @@ class NavigationSpec:
 
 @dataclass(frozen=True)
 class RelevanceSpec:
-    keyword_templates: tuple[str, ...] = ("{name}", "kontakt", "adresse")
+    keyword_templates: tuple[str, ...] = ("{name}", "contact", "address")
     min_total_keyword_hits: int = 6
     require_address: bool = True
     address: AddressSpec = field(default_factory=AddressSpec)
@@ -70,7 +70,16 @@ class SearchSpec:
 
     @classmethod
     def from_toml(cls, path: Path) -> tuple[SearchSpec, ScraperConfig]:
-        data = tomllib.loads(path.read_text(encoding="utf-8"))
+        if not path.exists():
+            raise ValueError(f"Spec file not found: {path}")
+        try:
+            raw = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError as e:
+            raise ValueError(
+                f"Spec file must be UTF-8 encoded: {path}"
+            ) from e
+        data = tomllib.loads(raw)
+        defaults = cls()
         search_data = _as_dict(data.get("search", {}))
         relevance_data = _as_dict(search_data.pop("relevance", data.get("relevance", {})))
         url_filter_data = _as_dict(search_data.pop("url_filter", data.get("url_filter", {})))
@@ -79,60 +88,73 @@ class SearchSpec:
         address_data = _as_dict(relevance_data.pop("address", data.get("address", {})))
 
         spec = cls(
-            query_template=str(search_data.get("query_template", cls().query_template)),
+            query_template=str(search_data.get("query_template", defaults.query_template)),
             relevance=RelevanceSpec(
                 keyword_templates=_ensure_str_tuple(
                     relevance_data.get("keyword_templates"),
-                    cls().relevance.keyword_templates,
+                    defaults.relevance.keyword_templates,
                 ),
-                min_total_keyword_hits=int(
-                    relevance_data.get(
-                        "min_total_keyword_hits", cls().relevance.min_total_keyword_hits
-                    )
+                min_total_keyword_hits=_safe_int(
+                    relevance_data.get("min_total_keyword_hits"),
+                    defaults.relevance.min_total_keyword_hits,
                 ),
-                require_address=bool(
-                    relevance_data.get("require_address", cls().relevance.require_address)
+                require_address=_safe_bool(
+                    relevance_data.get("require_address"),
+                    defaults.relevance.require_address,
                 ),
                 address=AddressSpec(
                     street_field=str(
-                        address_data.get("street_field", cls().relevance.address.street_field)
+                        address_data.get("street_field", defaults.relevance.address.street_field)
                     ),
-                    zip_field=str(address_data.get("zip_field", cls().relevance.address.zip_field)),
+                    zip_field=str(address_data.get("zip_field", defaults.relevance.address.zip_field)),
                     city_field=str(
-                        address_data.get("city_field", cls().relevance.address.city_field)
+                        address_data.get("city_field", defaults.relevance.address.city_field)
                     ),
-                    min_score=int(address_data.get("min_score", cls().relevance.address.min_score)),
+                    min_score=_safe_int(
+                        address_data.get("min_score"),
+                        defaults.relevance.address.min_score,
+                    ),
                 ),
             ),
             url_filter=UrlFilterSpec(
                 domain_match=str(
-                    url_filter_data.get("domain_match", cls().url_filter.domain_match)
+                    url_filter_data.get("domain_match", defaults.url_filter.domain_match)
                 ),
                 allowed_tlds=_ensure_str_tuple(
                     url_filter_data.get("allowed_tlds"),
-                    cls().url_filter.allowed_tlds,
+                    defaults.url_filter.allowed_tlds,
                 ),
                 domain_keyword_blacklist=_ensure_str_tuple(
                     url_filter_data.get("domain_keyword_blacklist"),
-                    cls().url_filter.domain_keyword_blacklist,
+                    defaults.url_filter.domain_keyword_blacklist,
                 ),
-                min_query_part_len=int(
-                    url_filter_data.get("min_query_part_len", cls().url_filter.min_query_part_len)
+                min_query_part_len=_safe_int(
+                    url_filter_data.get("min_query_part_len"),
+                    defaults.url_filter.min_query_part_len,
                 ),
             ),
             navigation=NavigationSpec(
-                max_google_results=int(
-                    navigation_data.get("max_google_results", cls().navigation.max_google_results)
+                max_google_results=_safe_int(
+                    navigation_data.get("max_google_results"),
+                    defaults.navigation.max_google_results,
                 ),
-                max_links_per_page=int(
-                    navigation_data.get("max_links_per_page", cls().navigation.max_links_per_page)
+                max_links_per_page=_safe_int(
+                    navigation_data.get("max_links_per_page"),
+                    defaults.navigation.max_links_per_page,
                 ),
-                subpage_depth=int(
-                    navigation_data.get("subpage_depth", cls().navigation.subpage_depth)
+                subpage_depth=_safe_int(
+                    navigation_data.get("subpage_depth"),
+                    defaults.navigation.subpage_depth,
                 ),
             ),
-            extract_phone=bool(search_data.get("extract_phone", cls().extract_phone)),
-            extract_email=bool(search_data.get("extract_email", cls().extract_email)),
+            extract_phone=_safe_bool(
+                search_data.get("extract_phone"),
+                defaults.extract_phone,
+            ),
+            extract_email=_safe_bool(
+                search_data.get("extract_email"),
+                defaults.extract_email,
+            ),
         )
 
         scraper_cfg = ScraperConfig.from_mapping(_as_dict(data.get("selenium", {})))
@@ -155,6 +177,30 @@ def render_templates(templates: tuple[str, ...], row: dict[str, str]) -> list[st
 
 def _as_dict(value: Any) -> dict[str, Any]:
     return dict(value) if isinstance(value, dict) else {}
+
+
+def _safe_int(value: Any, default: int) -> int:
+    if value is None:
+        return default
+    if isinstance(value, int) and not isinstance(value, bool):
+        return value
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _safe_bool(value: Any, default: bool) -> bool:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.lower() in ("true", "1", "yes")
+    try:
+        return bool(value)
+    except (TypeError, ValueError):
+        return default
 
 
 def _ensure_str_tuple(value: Any, default: tuple[str, ...]) -> tuple[str, ...]:

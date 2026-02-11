@@ -46,13 +46,15 @@ def run(
             header = next(reader, None)
             if not header:
                 raise ValueError("Input CSV is empty.")
-            input_columns = [h.strip() for h in header if h.strip()]
-            if not input_columns:
+            raw_columns = [h.strip() for h in header if h.strip()]
+            if not raw_columns:
                 raise ValueError("Header row is empty (no column names).")
+            input_columns = list(dict.fromkeys(raw_columns))
 
     out_header = [*input_columns, "Website", "Phone", "Email"]
-    session = Session.create(config, profile_dir=config.chrome_profile_root)
+    session = None
     try:
+        session = Session.create(config, profile_dir=config.chrome_profile_root)
         for row in read_csv_rows(
             input_file, delimiter=delimiter, has_header=has_header, columns=input_columns or columns
         ):
@@ -85,7 +87,8 @@ def run(
             wrote_header = True
             random_pause(1, 2)
     finally:
-        session.close()
+        if session is not None:
+            session.close()
 
     logging.info("All rows done => %s", output_file)
     return 0
@@ -95,9 +98,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Humanized Selenium scraper (configurable, offline-testable core)."
     )
-    parser.add_argument("--input", default="adressen.csv", help="Input CSV path.")
-    parser.add_argument("--output", default="ergebnisse.csv", help="Output CSV path.")
-    parser.add_argument("--google-domain", help="e.g. google.de or google.com")
+    parser.add_argument("--input", default="input.csv", help="Input CSV path.")
+    parser.add_argument("--output", default="output.csv", help="Output CSV path.")
+    parser.add_argument("--google-domain", help="e.g. google.com or google.de")
     parser.add_argument("--delimiter", default=",", help="CSV delimiter (default: ',').")
     parser.add_argument(
         "--header",
@@ -118,7 +121,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--spec", help="Path to a TOML spec file.")
     parser.add_argument(
         "--query-template",
-        help="Python format template, e.g. '{name} {city} kontakt'.",
+        help="Python format template, e.g. '{name} {city} contact'.",
     )
     parser.add_argument(
         "--keyword-template",
@@ -196,7 +199,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     spec = SearchSpec.presets()[args.preset]
-    config = ScraperConfig(google_domain=args.google_domain or "google.de")
+    config = ScraperConfig(google_domain=args.google_domain or "google.com")
 
     if args.spec:
         spec, config_from_spec = SearchSpec.from_toml(Path(args.spec))

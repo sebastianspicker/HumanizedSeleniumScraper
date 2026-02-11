@@ -23,14 +23,8 @@ from .selenium_ops import click_cookie_consent_if_present, safe_get
 from .spec import SearchSpec, render_templates
 from .url_filter import is_relevant_url
 
-IMPO_KEYWORDS = ("impressum", "kontakt", "datenschutz", "imprint", "privacy")
-
-
-def random_synonym_query(name: str, street: str, plz: str, city: str) -> str:
-    raw = f"{name} {street} {plz} {city}"
-    if random.random() < 0.1:
-        raw = raw.replace("straße", "strasse")
-    return raw
+# Common legal/contact link labels (DE + EN) for subpage link priority
+IMPO_KEYWORDS = ("impressum", "kontakt", "datenschutz", "imprint", "contact", "privacy")
 
 
 def link_priority(element: Any) -> int:
@@ -139,7 +133,7 @@ class Session:
         except Exception:
             pass
 
-    def maybe_restart_driver(self, *, profile_dir) -> None:
+    def maybe_restart_driver(self, *, profile_dir: Path) -> None:
         if self.counter == 0:
             return
         if self.config.restart_threshold <= 0:

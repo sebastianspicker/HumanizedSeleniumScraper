@@ -23,5 +23,5 @@ pip-audit -r requirements.txt
 
 ## Commit checklist
 
-- No generated files committed (`*.egg-info/`, `.ruff_cache/`, `.pytest_cache/`, `chrome_profile/`, `scraper.log`)
+- No generated files committed (`*.egg-info/`, `.ruff_cache/`, `.pytest_cache/`, `chrome_profile/`, `scraper.log`, `input.csv`, `output.csv`)
 - `ruff check .`, `mypy humanized_selenium_scraper`, `pytest -q` are green

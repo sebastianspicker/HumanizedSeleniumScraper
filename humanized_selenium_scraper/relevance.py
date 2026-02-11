@@ -2,12 +2,14 @@ from __future__ import annotations
 
 
 def normalize_address_part(text: str) -> str:
+    """Lowercase and normalize for matching (umlauts, German street variants)."""
     normalized = text.lower()
     normalized = normalized.replace("ü", "u").replace("ö", "o").replace("ä", "a").replace("ß", "ss")
     normalized = (
-        normalized.replace("str.", "straße")
-        .replace("strasse", "straße")
-        .replace("strass", "straße")
+        normalized.replace("str.", "str")
+        .replace("strasse", "str")
+        .replace("strass", "str")
+        .replace("straße", "str")
     )
     return normalized
 

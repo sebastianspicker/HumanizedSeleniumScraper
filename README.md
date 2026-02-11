@@ -37,10 +37,10 @@ python -m pip install -e ".[dev]"
 
 ## Quickstart
 
-Headerless CSV with default columns (`name,street,plz,city`):
+Headerless CSV with default columns (`name`, `street`, `plz`, `city`; use `zip` or `postal_code` if you prefer):
 
 ```bash
-python -m humanized_selenium_scraper --input adressen.csv --output ergebnisse.csv
+python -m humanized_selenium_scraper --input input.csv --output output.csv
 ```
 
 CSV with header row:
