@@ -5,7 +5,7 @@ This repo uses two GitHub Actions workflows:
 - `CI` (`.github/workflows/ci.yml`)
   - Triggers: `pull_request`, `push` to `main`, `workflow_dispatch`
   - Jobs:
-    - `Lint + Test` (Python 3.10/3.11/3.12): ruff format check, ruff lint, mypy, pytest
+    - `Lint + Test` (Python 3.12): ruff format check, ruff lint, mypy, pytest
     - `Security` (Python 3.12): gitleaks working-tree scan, bandit SAST
 - `Security Audit` (`.github/workflows/security.yml`)
   - Triggers: weekly schedule (Monday 06:00 UTC) and `workflow_dispatch`

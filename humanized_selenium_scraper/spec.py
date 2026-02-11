@@ -1,13 +1,9 @@
 from __future__ import annotations
 
+import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
-
-try:
-    import tomllib
-except ModuleNotFoundError:  # Python < 3.11
-    import tomli as tomllib
 
 from .config import ScraperConfig
 from .url_filter import DEFAULT_ALLOWED_TLDS, DEFAULT_DOMAIN_KEYWORD_BLACKLIST
@@ -75,9 +71,7 @@ class SearchSpec:
         try:
             raw = path.read_text(encoding="utf-8")
         except UnicodeDecodeError as e:
-            raise ValueError(
-                f"Spec file must be UTF-8 encoded: {path}"
-            ) from e
+            raise ValueError(f"Spec file must be UTF-8 encoded: {path}") from e
         data = tomllib.loads(raw)
         defaults = cls()
         search_data = _as_dict(data.get("search", {}))
@@ -106,7 +100,9 @@ class SearchSpec:
                     street_field=str(
                         address_data.get("street_field", defaults.relevance.address.street_field)
                     ),
-                    zip_field=str(address_data.get("zip_field", defaults.relevance.address.zip_field)),
+                    zip_field=str(
+                        address_data.get("zip_field", defaults.relevance.address.zip_field)
+                    ),
                     city_field=str(
                         address_data.get("city_field", defaults.relevance.address.city_field)
                     ),

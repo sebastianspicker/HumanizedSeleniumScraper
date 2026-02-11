@@ -18,9 +18,7 @@ def do_infinite_scrolling(driver, max_scroll: int = 3, pause_s: float = 1.0) -> 
     height_script = "return document.body ? document.body.scrollHeight : 0"
     last_height = driver.execute_script(height_script) or 0
     for _ in range(max_scroll):
-        driver.execute_script(
-            "var b = document.body; if (b) window.scrollTo(0, b.scrollHeight);"
-        )
+        driver.execute_script("var b = document.body; if (b) window.scrollTo(0, b.scrollHeight);")
         time.sleep(pause_s)
         new_height = driver.execute_script(height_script) or 0
         if new_height == last_height:

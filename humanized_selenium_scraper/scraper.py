@@ -79,7 +79,7 @@ def search_subpages(
     links = driver.find_elements(By.TAG_NAME, "a")[:max_links]
     links_sorted = sorted(links, key=link_priority)
 
-    for idx, link in enumerate(links_sorted):
+    for _idx, link in enumerate(links_sorted):
         try:
             href = link.get_attribute("href")
         except StaleElementReferenceException as exc:
@@ -187,7 +187,7 @@ class Session:
         top = glinks[: spec.navigation.max_google_results]
         random.shuffle(top)
 
-        for idx, link in enumerate(top):
+        for _idx, link in enumerate(top):
             try:
                 href = link.get_attribute("href")
             except StaleElementReferenceException as exc:

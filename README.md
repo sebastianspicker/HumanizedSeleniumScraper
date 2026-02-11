@@ -15,7 +15,7 @@ Human-like Google search scraping with Selenium. The scraper reads CSV rows, bui
 
 ## Requirements
 
-- Python 3.10+
+- Python 3.12+
 - Chrome/Chromium installed (Selenium Manager will fetch a compatible driver at runtime)
 - Network access (Google + target sites)
 

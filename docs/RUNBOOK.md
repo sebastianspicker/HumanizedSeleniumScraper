@@ -3,7 +3,7 @@
 ## Setup
 
 Prereqs:
-- Python 3.10+
+- Python 3.12+
 - Chrome or Chromium installed (Selenium Manager will fetch a compatible driver at runtime).
 
 Create and activate a virtualenv, then install dependencies:

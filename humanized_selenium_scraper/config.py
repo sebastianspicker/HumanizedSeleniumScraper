@@ -66,7 +66,9 @@ class ScraperConfig:
             google_domain=str(data.get("google_domain", defaults.google_domain)),
             restart_threshold=_int("restart_threshold", defaults.restart_threshold),
             max_retries=_int("max_retries", defaults.max_retries),
-            chrome_profile_root=chrome_root if chrome_root is not None else defaults.chrome_profile_root,
+            chrome_profile_root=chrome_root
+            if chrome_root is not None
+            else defaults.chrome_profile_root,
             page_load_timeout_s=_int("page_load_timeout_s", defaults.page_load_timeout_s),
             implicit_wait_s=_int("implicit_wait_s", defaults.implicit_wait_s),
         )
