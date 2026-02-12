@@ -1,6 +1,6 @@
 # HumanizedSeleniumScraper
 
-Human-like Google search scraping with Selenium. The scraper reads CSV rows, builds a query, searches Google, evaluates relevance, optionally explores subpages on the same domain, and extracts phone/email signals.
+Human-like Google search scraping with Selenium. *(Archived; see `ARCHIVE.md`.)* The scraper reads CSV rows, builds a query, searches Google, evaluates relevance, optionally explores subpages on the same domain, and extracts phone/email signals.
 
 ## Features
 
@@ -98,9 +98,9 @@ Refer to `example_search_spec.toml` for a full example.
 - Query contents are redacted in logs (length and token count only).
 - Output data may include phone/email; handle it according to your privacy requirements.
 
-## Development
+## Development & validation
 
-Fast loop:
+Quick check (format, lint, tests):
 
 ```bash
 ruff format .
@@ -114,20 +114,17 @@ Type checking:
 mypy humanized_selenium_scraper
 ```
 
-Tests are offline by design and should not launch a browser.
+Build (optional):
 
-See `CONTRIBUTING.md` for contributor guidelines and `docs/RUNBOOK.md` for the full command set.
+```bash
+python -m build
+```
+
+Tests run offline and do not launch a browser. See `Makefile` for more targets (`make ci`, `make test`, etc.). Archive status: `ARCHIVE.md`.
 
 ## Security
 
-CI runs:
-- Secret scan: gitleaks
-- Dependency audit: pip-audit
-- SAST: bandit (medium+ severity)
-
-See `docs/RUNBOOK.md` for local commands.
-
-For responsible disclosure, see `SECURITY.md`.
+For responsible disclosure see `SECURITY.md`. Optional local checks: `pip-audit -r requirements.txt`, `bandit -r humanized_selenium_scraper -x tests --severity-level medium`.
 
 ## Troubleshooting
 
